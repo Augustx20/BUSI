@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import './App.css'
+import ContactSection from './features/contact/components/ContactSection'
 
 const journeySections = [
   { id: 'presentacion', label: 'Inicio', stop: '01' },
@@ -122,9 +123,6 @@ const benefits = [
 
 function App() {
   const [activeSection, setActiveSection] = useState(journeySections[0].id)
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' })
-  const [formStatus, setFormStatus] = useState({ type: '', message: '' })
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     const sectionElements = journeySections
@@ -155,36 +153,6 @@ function App() {
 
     return () => observer.disconnect()
   }, [])
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setFormStatus({ type: '', message: '' })
-
-    try {
-      const response = await fetch('/api/landing/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-
-      if (response.ok) {
-        setFormStatus({ type: 'success', message: 'Consulta enviada. Nos contactaremos pronto.' })
-        setFormData({ name: '', email: '', phone: '', message: '' })
-      } else {
-        setFormStatus({ type: 'error', message: 'Error al enviar. Intenta de nuevo.' })
-      }
-    } catch (error) {
-      setFormStatus({ type: 'error', message: 'No se pudo conectar con el servidor.' })
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
 
   const activeSectionIndex = Math.max(
     journeySections.findIndex(({ id }) => id === activeSection),
@@ -414,75 +382,7 @@ function App() {
           </section>
 
           <section className="content-section cta-section" id="acciones">
-            <span className="section-tag">Contactanos</span>
-            <h2>Contactanos para implementar Busi en tu organizacion.</h2>
-            <p>
-              Completá tus datos y te contactamos para evaluar tu operacion,
-              configurar el servicio y acompanarte en la implementacion.
-            </p>
-
-            <form className="contact-form" onSubmit={handleSubmit} id="demo">
-              <div className="form-group">
-                <label htmlFor="name">Nombre completo *</label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="Tu nombre"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="email">Correo electronico *</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="tu@email.com"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="phone">Telefono</label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  placeholder="+54 9 11 2345-6789"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="message">Mensaje *</label>
-                <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="Contanos sobre tu organizacion y que te interesa de Busi"
-                  rows="4"
-                ></textarea>
-              </div>
-
-              {formStatus.message && (
-                <div className={`form-status form-status--${formStatus.type}`}>
-                  {formStatus.message}
-                </div>
-              )}
-
-              <button type="submit" className="button button--primary" disabled={isSubmitting}>
-                {isSubmitting ? 'Enviando...' : 'Enviar consulta'}
-              </button>
-            </form>
+            <ContactSection />
           </section>
 
           <footer className="footer">

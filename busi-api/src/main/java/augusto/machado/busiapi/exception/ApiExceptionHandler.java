@@ -28,6 +28,15 @@ public class ApiExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
+    @ExceptionHandler(MailDeliveryException.class)
+    public ResponseEntity<Map<String, Object>> handleMailDeliveryError(MailDeliveryException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", false);
+        response.put("message", "No se pudo enviar el mensaje de contacto. Intenta nuevamente en unos minutos");
+
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
+    }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleUnexpectedError(Exception ex) {

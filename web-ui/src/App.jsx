@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
 import ContactSection from './features/contact/components/ContactSection'
 
@@ -123,6 +123,9 @@ const benefits = [
 
 function App() {
   const [activeSection, setActiveSection] = useState(journeySections[0].id)
+  const [routeProgress, setRouteProgress] = useState(0)
+  const targetProgressRef = useRef(0)
+  const currentProgressRef = useRef(0)
 
   useEffect(() => {
     const sectionElements = journeySections
@@ -154,63 +157,148 @@ function App() {
     return () => observer.disconnect()
   }, [])
 
-  const activeSectionIndex = Math.max(
-    journeySections.findIndex(({ id }) => id === activeSection),
-    0,
-  )
-  const routeProgress =
-    journeySections.length > 1 ? activeSectionIndex / (journeySections.length - 1) : 0
+  useEffect(() => {
+    let frameId = null
+    let resizeTimeoutId = null
 
-  // Arranca un poco más abajo para no chocar con los badges superiores.
-  const busTop = `${14 + routeProgress * 70}%`
-  const lineProgress = `${16 + routeProgress * 66}%`
+    const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
+
+    const computeTargetProgress = () => {
+      const journeyElement = document.querySelector('.journey')
+      const contactSection = document.getElementById('acciones')
+
+      if (!journeyElement || !contactSection) {
+        return
+      }
+
+      const viewportAnchor = window.scrollY + window.innerHeight * 0.42
+      const journeyStartY = journeyElement.getBoundingClientRect().top + window.scrollY
+
+      // El bus se fija en el ultimo punto cuando el ancla visual alcanza Contacto.
+      const contactLockY =
+        contactSection.getBoundingClientRect().top +
+        window.scrollY +
+        contactSection.getBoundingClientRect().height * 0.18
+
+      const rawProgress = (viewportAnchor - journeyStartY) / Math.max(contactLockY - journeyStartY, 1)
+      targetProgressRef.current = clamp(rawProgress, 0, 1)
+    }
+
+    const animate = () => {
+      const target = targetProgressRef.current
+      const current = currentProgressRef.current
+      const next = current + (target - current) * 0.18
+
+      if (Math.abs(next - target) < 0.0012) {
+        currentProgressRef.current = target
+        setRouteProgress(target)
+        frameId = null
+        return
+      }
+
+      currentProgressRef.current = next
+      setRouteProgress(next)
+      frameId = window.requestAnimationFrame(animate)
+    }
+
+    const syncProgress = () => {
+      computeTargetProgress()
+
+      if (frameId === null) {
+        frameId = window.requestAnimationFrame(animate)
+      }
+    }
+
+    const handleResize = () => {
+      // Debounce simple para evitar recalculos excesivos durante resize continuo.
+      window.clearTimeout(resizeTimeoutId)
+      resizeTimeoutId = window.setTimeout(syncProgress, 80)
+    }
+
+    syncProgress()
+    window.addEventListener('scroll', syncProgress, { passive: true })
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      window.removeEventListener('scroll', syncProgress)
+      window.removeEventListener('resize', handleResize)
+
+      if (resizeTimeoutId) {
+        window.clearTimeout(resizeTimeoutId)
+      }
+
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId)
+      }
+    }
+  }, [])
+
+  // Ajuste fino: permite que el bus sobrepase levemente la ultima parada visual.
+  const BUS_START = 14
+  const BUS_TRAVEL = 75
+  const LINE_START = 16
+  const LINE_TRAVEL = 70
+
+  const busTop = `${BUS_START + routeProgress * BUS_TRAVEL}%`
+  const lineProgress = `${LINE_START + routeProgress * LINE_TRAVEL}%`
 
   return (
     <div className="landing-page">
       <header className="hero" id="inicio">
-        <nav className="topbar" aria-label="Principal">
-          <a className="brand" href="#inicio">
-            <span className="brand__icon">B</span>
-            <span>Busi</span>
-          </a>
+        <div className="hero__shell">
+          <nav className="topbar" aria-label="Principal">
+            <a className="brand" href="#inicio">
+              <span>Busi</span>
+            </a>
 
-          <div className="topbar__links">
-            <a href="#presentacion">Presentacion</a>
-            <a href="#problema">Problema</a>
-            <a href="#solucion">Solucion</a>
-            <a href="#como-funciona">Como funciona</a>
-            <a href="#acciones">Acciones</a>
-          </div>
-        </nav>
-
-        <div className="hero__content">
-          <div className="hero__copy">
-            <span className="eyebrow">Plataforma web y movil para transportes privados</span>
-            <h1>Busi convierte cada recorrido de servicio en una experiencia mas clara y segura.</h1>
-            <p className="hero__lead">
-              Busi ayuda a coordinacion, operadores y clientes a organizar rutas de servicio,
-              seguir cada unidad en tiempo real y mantener la comunicacion conectada en un
-              solo sistema.
-            </p>
-            <p className="hero__route-note">
-              Al bajar por la pagina, la unidad avanza sobre la ruta y cada parada presenta
-              una parte clave del sistema.
-            </p>
-
-            <div className="hero__actions">
-              <a className="button button--primary" href="#demo">
-                Contactanos
-              </a>
-              <a className="button button--secondary" href="#solucion">
-                Ver la solucion
-              </a>
+            <div className="topbar__links">
+              <a href="#presentacion">Presentacion</a>
+              <a href="#problema">Problema</a>
+              <a href="#solucion">Solucion</a>
+              <a href="#como-funciona">Como funciona</a>
+              <a href="#acciones">Acciones</a>
             </div>
 
-            <ul className="hero__highlights" aria-label="Puntos clave de Busi">
-              {heroHighlights.map((highlight) => (
-                <li key={highlight}>{highlight}</li>
-              ))}
-            </ul>
+            <a className="button button--dark topbar__cta" href="#acciones">
+              Contacto
+            </a>
+          </nav>
+
+          <div className="hero__content">
+            <div className="hero__copy">
+              <span className="eyebrow eyebrow--hero">Plataforma web y movil para transportes privados</span>
+              <h1>Busi convierte cada recorrido de servicio en una experiencia mas clara y segura.</h1>
+              <p className="hero__lead">
+                Busi ayuda a coordinacion, operadores y clientes a organizar rutas de servicio,
+                seguir cada unidad en tiempo real y mantener la comunicacion conectada en un
+                solo sistema.
+              </p>
+
+              <div className="hero__actions">
+                <a className="button button--primary" href="#acciones">
+                  Contactanos
+                </a>
+                <a className="button button--secondary" href="#solucion">
+                  Ver la solucion
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="hero__summary">
+            <div className="hero__note-card">
+              <span className="section-tag">Vision general</span>
+              <p className="hero__route-note">
+                Al bajar por la pagina, la unidad avanza sobre la ruta y cada parada presenta
+                una parte clave del sistema.
+              </p>
+
+              <ul className="hero__highlights" aria-label="Puntos clave de Busi">
+                {heroHighlights.map((highlight) => (
+                  <li key={highlight}>{highlight}</li>
+                ))}
+              </ul>
+            </div>
 
             <ul className="hero__stats" aria-label="Resumen del sistema">
               {heroStats.map((stat) => (
@@ -222,26 +310,6 @@ function App() {
             </ul>
           </div>
 
-          <div className="hero__visual" aria-hidden="true">
-            <div className="map-card">
-              <div className="map-card__legend">
-                <span>Recorrido de servicio</span>
-                <strong>Ruta conectada</strong>
-              </div>
-              <div className="map-card__status">Scroll para avanzar por la ruta</div>
-              <div className="map-card__block map-card__block--one"></div>
-              <div className="map-card__block map-card__block--two"></div>
-              <div className="map-card__block map-card__block--three"></div>
-              <div className="map-card__bus" style={{ top: busTop }}>
-                BUS
-              </div>
-              <div className="map-card__line"></div>
-              <div className="map-card__line-active" style={{ height: lineProgress }}></div>
-              <div className="map-card__stop map-card__stop--one">Base</div>
-              <div className="map-card__stop map-card__stop--two">Seguimiento</div>
-              <div className="map-card__stop map-card__stop--three">Clientes informados</div>
-            </div>
-          </div>
         </div>
       </header>
 
@@ -384,34 +452,34 @@ function App() {
           <section className="content-section cta-section" id="acciones">
             <ContactSection />
           </section>
-
-          <footer className="footer">
-            <div className="footer__content">
-              <div className="footer__section">
-                <h4>Busi</h4>
-                <p>Plataforma de gestion integral de transportes privados en tiempo real.</p>
-              </div>
-              <div className="footer__section">
-                <h4>Links</h4>
-                <ul>
-                  <li><a href="#inicio">Inicio</a></li>
-                  <li><a href="#solucion">Solución</a></li>
-                  <li><a href="#beneficios">Beneficios</a></li>
-                  <li><a href="#acciones">Contacto</a></li>
-                </ul>
-              </div>
-              <div className="footer__section">
-                <h4>Contacto</h4>
-                <p>info@busi.app</p>
-                <p>+54 9 11 2345-6789</p>
-              </div>
-            </div>
-            <div className="footer__bottom">
-              <p>&copy; 2026 Busi. Todos los derechos reservados.</p>
-            </div>
-          </footer>
         </div>
       </main>
+
+      <footer className="footer">
+        <div className="footer__content">
+          <div className="footer__section">
+            <h4>Busi</h4>
+            <p>Plataforma de gestion integral de transportes privados en tiempo real.</p>
+          </div>
+          <div className="footer__section">
+            <h4>Links</h4>
+            <ul>
+              <li><a href="#inicio">Inicio</a></li>
+              <li><a href="#solucion">Solución</a></li>
+              <li><a href="#beneficios">Beneficios</a></li>
+              <li><a href="#acciones">Contacto</a></li>
+            </ul>
+          </div>
+          <div className="footer__section">
+            <h4>Contacto</h4>
+            <p>info@busi.app</p>
+            <p>+54 9 11 2345-6789</p>
+          </div>
+        </div>
+        <div className="footer__bottom">
+          <p>&copy; 2026 Busi. Todos los derechos reservados.</p>
+        </div>
+      </footer>
     </div>
   )
 }

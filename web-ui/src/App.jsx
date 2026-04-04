@@ -251,17 +251,18 @@ function App() {
               <span>Busi</span>
             </a>
 
-            <div className="topbar__links">
-              <a href="#presentacion">Presentacion</a>
-              <a href="#problema">Problema</a>
-              <a href="#solucion">Solucion</a>
-              <a href="#como-funciona">Como funciona</a>
-              <a href="#acciones">Acciones</a>
-            </div>
+            <div className="topbar__nav">
+              <div className="topbar__links">
+                <a href="#presentacion">Presentacion</a>
+                <a href="#problema">Problema</a>
+                <a href="#solucion">Solucion</a>
+                <a href="#como-funciona">Como funciona</a>
+                <a href="#acciones">Acciones</a>
+                <a href='#acciones'>Contacto</a>
+              </div>
 
-            <a className="button button--dark topbar__cta" href="#acciones">
-              Contacto
-            </a>
+              <a className="button button--dark topbar__cta">Portal</a>
+            </div>
           </nav>
 
           <div className="hero__content">

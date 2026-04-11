@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
 import ContactSection from './features/contact/components/ContactSection'
+import Navbar from './components/layout/Navbar'
 
 const journeySections = [
   { id: 'presentacion', label: 'Inicio', stop: '01' },
@@ -246,24 +247,7 @@ function App() {
     <div className="landing-page">
       <header className="hero" id="inicio">
         <div className="hero__shell">
-          <nav className="topbar" aria-label="Principal">
-            <a className="brand" href="#inicio">
-              <span>Busi</span>
-            </a>
-
-            <div className="topbar__nav">
-              <div className="topbar__links">
-                <a href="#presentacion">Presentacion</a>
-                <a href="#problema">Problema</a>
-                <a href="#solucion">Solucion</a>
-                <a href="#como-funciona">Como funciona</a>
-                <a href="#acciones">Acciones</a>
-                <a href='#acciones'>Contacto</a>
-              </div>
-
-              <a className="button button--dark topbar__cta">Portal</a>
-            </div>
-          </nav>
+          <Navbar />
 
           <div className="hero__content">
             <div className="hero__copy">

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
 import ContactSection from './features/contact/components/ContactSection'
+import Navbar from './components/layout/Navbar'
 
 const journeySections = [
   { id: 'presentacion', label: 'Inicio', stop: '01' },
@@ -121,11 +122,58 @@ const benefits = [
   },
 ]
 
+const tripStatusByCode = {
+  'BUS-1024': {
+    status: 'En camino',
+    detail: 'La unidad avanza en horario y llegara en aproximadamente 14 minutos.',
+    tone: 'ontime',
+  },
+  'BUS-2048': {
+    status: 'Demorado',
+    detail: 'Hay trafico en la ruta. Nuevo arribo estimado en 28 minutos.',
+    tone: 'delayed',
+  },
+  'BUS-3096': {
+    status: 'Finalizado',
+    detail: 'El viaje ya llego a destino y fue cerrado correctamente.',
+    tone: 'done',
+  },
+}
+
 function App() {
   const [activeSection, setActiveSection] = useState(journeySections[0].id)
   const [routeProgress, setRouteProgress] = useState(0)
+  const [tripCode, setTripCode] = useState('')
+  const [tripLookup, setTripLookup] = useState(null)
+  const [tripLookupError, setTripLookupError] = useState('')
   const targetProgressRef = useRef(0)
   const currentProgressRef = useRef(0)
+
+  const handleTripSearch = (event) => {
+    event.preventDefault()
+
+    const normalizedCode = tripCode.trim().toUpperCase()
+
+    if (!normalizedCode) {
+      setTripLookup(null)
+      setTripLookupError('Ingresa un codigo de viaje para consultar el estado.')
+      return
+    }
+
+    const foundTrip = tripStatusByCode[normalizedCode]
+
+    if (!foundTrip) {
+      setTripLookup(null)
+      setTripLookupError('No encontramos ese codigo. Proba con BUS-1024, BUS-2048 o BUS-3096.')
+      return
+    }
+
+    setTripLookup({
+      code: normalizedCode,
+      ...foundTrip,
+    })
+    setTripLookupError('')
+  }
 
   useEffect(() => {
     const sectionElements = journeySections
@@ -246,44 +294,47 @@ function App() {
     <div className="landing-page">
       <header className="hero" id="inicio">
         <div className="hero__shell">
-          <nav className="topbar" aria-label="Principal">
-            <a className="brand" href="#inicio">
-              <span>Busi</span>
-            </a>
-
-            <div className="topbar__nav">
-              <div className="topbar__links">
-                <a href="#presentacion">Presentacion</a>
-                <a href="#problema">Problema</a>
-                <a href="#solucion">Solucion</a>
-                <a href="#como-funciona">Como funciona</a>
-                <a href="#acciones">Acciones</a>
-                <a href='#acciones'>Contacto</a>
-              </div>
-
-              <a className="button button--dark topbar__cta">Portal</a>
-            </div>
-          </nav>
+          <Navbar />
 
           <div className="hero__content">
             <div className="hero__copy">
               <span className="eyebrow eyebrow--hero">Plataforma web y movil para transportes privados</span>
-              <h1>Busi convierte cada recorrido de servicio en una experiencia mas clara y segura.</h1>
-              <p className="hero__lead">
-                Busi ayuda a coordinacion, operadores y clientes a organizar rutas de servicio,
-                seguir cada unidad en tiempo real y mantener la comunicacion conectada en un
-                solo sistema.
-              </p>
+              <h1>Todo tu transporte, en un solo lugar.</h1>
+              <p className="hero__lead">Optimización, trazabilidad y control para tu operación de transporte.</p>
 
-              <div className="hero__actions">
-                <a className="button button--primary" href="#acciones">
-                  Contactanos
-                </a>
-                <a className="button button--secondary" href="#solucion">
-                  Ver la solucion
-                </a>
-              </div>
             </div>
+
+            <form className="hero__trip-search" onSubmit={handleTripSearch} aria-label="Consultar estado de viaje">
+              <label className="hero__trip-search-title" htmlFor="trip-code-input">
+                Estado de tu viaje
+              </label>
+
+              <div className="hero__trip-search-controls">
+                <input
+                  id="trip-code-input"
+                  type="text"
+                  placeholder="Ingresa tu codigo. Ej: BUS-1024"
+                  value={tripCode}
+                  onChange={(event) => {
+                    setTripCode(event.target.value)
+                    setTripLookupError('')
+                  }}
+                />
+                <button className="button button--primary hero__trip-search-button" type="submit">
+                  Search
+                </button>
+              </div>
+
+              {tripLookupError && (
+                <p className="hero__trip-search-feedback hero__trip-search-feedback--error">{tripLookupError}</p>
+              )}
+
+              {!tripLookupError && tripLookup && (
+                <p className={`hero__trip-search-feedback hero__trip-search-feedback--${tripLookup.tone}`}>
+                  <strong>{tripLookup.status}:</strong> {tripLookup.detail}
+                </p>
+              )}
+            </form>
           </div>
 
           <div className="hero__summary">

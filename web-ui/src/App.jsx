@@ -12,11 +12,6 @@ const journeySections = [
   { id: 'acciones', label: 'Accion', stop: '06' },
 ]
 
-const heroHighlights = [
-  'Organiza rutas, paradas y recorridos de transportes privados desde una sola vista.',
-  'Comparte seguimiento en tiempo real para reducir la incertidumbre operativa diaria.',
-  'Mejora la comunicacion entre coordinacion, operadores y clientes en un mismo entorno.',
-]
 
 const heroStats = [
   {
@@ -45,24 +40,33 @@ const features = [
     title: 'Gestion de rutas de servicio',
     description:
       'Configura recorridos, paradas y horarios desde una interfaz clara para que la operacion tenga control centralizado.',
+    image: "/images/Amy's flight home.jpeg",
+    imagePosition: 'center 40%',
   },
   {
     stop: 'Parada 02',
     title: 'Seguimiento de unidades en tiempo real',
     description:
       'Muestra el avance del recorrido para que los clientes sepan donde viene la unidad y la coordinacion pueda supervisar.',
+    image:
+      '/images/Great work makes a great office. Creative multi ethnic business group at lunch break.jpeg',
+    imagePosition: 'center 35%',
   },
   {
     stop: 'Parada 03',
     title: 'Comunicacion conectada',
     description:
       'Reune a coordinacion, operadores y clientes en un mismo flujo para evitar informacion fragmentada y mensajes cruzados.',
+    image: '/images/Two women analyzing document.jpeg',
+    imagePosition: 'center 36%',
   },
   {
     stop: 'Parada 04',
     title: 'Notificaciones automaticas',
     description:
       'Informa novedades, demoras y puntos de llegada para mantener a todos actualizados sin esfuerzo manual.',
+    image: '/images/Family sitting on the floor together, using a tablet .jpeg',
+    imagePosition: 'center 42%',
   },
 ]
 
@@ -138,6 +142,11 @@ const tripStatusByCode = {
     detail: 'El viaje ya llego a destino y fue cerrado correctamente.',
     tone: 'done',
   },
+}
+
+const getPublicImageUrl = (imagePath) => {
+  const normalizedPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath
+  return `${import.meta.env.BASE_URL}${encodeURI(normalizedPath)}`
 }
 
 function App() {
@@ -281,14 +290,40 @@ function App() {
     }
   }, [])
 
+  // ── Reveal on scroll ──────────────────────────────────────────
+  useEffect(() => {
+    const elements = document.querySelectorAll('[data-reveal]')
+    if (!elements.length) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible')
+            return
+          }
+
+          entry.target.classList.remove('is-visible')
+        })
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' },
+    )
+
+    elements.forEach((el) => observer.observe(el))
+    return () => observer.disconnect()
+  }, [])
+
   // Ajuste fino: permite que el bus sobrepase levemente la ultima parada visual.
   const BUS_START = 14
   const BUS_TRAVEL = 75
-  const LINE_START = 16
-  const LINE_TRAVEL = 70
+  const LINE_START = 12
+  const BUS_LINE_GAP = 2.8
 
-  const busTop = `${BUS_START + routeProgress * BUS_TRAVEL}%`
-  const lineProgress = `${LINE_START + routeProgress * LINE_TRAVEL}%`
+  const busTopValue = BUS_START + routeProgress * BUS_TRAVEL
+  const lineProgressValue = Math.max(LINE_START, busTopValue - BUS_LINE_GAP)
+
+  const busTop = `${busTopValue}%`
+  const lineProgress = `${lineProgressValue}%`
 
   return (
     <div className="landing-page">
@@ -299,7 +334,7 @@ function App() {
           <div className="hero__content">
             <div className="hero__copy">
               <span className="eyebrow eyebrow--hero">Plataforma web y movil para transportes privados</span>
-              <h1>Todo tu transporte, en un solo lugar.</h1>
+              <h1>Todo tu transporte, <em className="kw kw--light">en un solo lugar.</em></h1>
               <p className="hero__lead">Optimización, trazabilidad y control para tu operación de transporte.</p>
 
             </div>
@@ -321,7 +356,7 @@ function App() {
                   }}
                 />
                 <button className="button button--primary hero__trip-search-button" type="submit">
-                  Search
+                  Buscar
                 </button>
               </div>
 
@@ -338,18 +373,12 @@ function App() {
           </div>
 
           <div className="hero__summary">
-            <div className="hero__note-card">
-              <span className="section-tag">Vision general</span>
-              <p className="hero__route-note">
-                Al bajar por la pagina, la unidad avanza sobre la ruta y cada parada presenta
-                una parte clave del sistema.
+            <div className="hero__vision-copy">
+              <span className="section-tag">Visión general</span>
+              <p className="hero__vision-title">Una operación <em className="kw">más clara</em>, conectada y predecible — con control y visibilidad en cada recorrido.</p>
+              <p className="hero__vision-lead">
+                Busi unifica <em className="kw">planificación</em>, seguimiento y comunicación en una sola plataforma, permitiendo que cada actor del servicio tome mejores decisiones con información en tiempo real.
               </p>
-
-              <ul className="hero__highlights" aria-label="Puntos clave de Busi">
-                {heroHighlights.map((highlight) => (
-                  <li key={highlight}>{highlight}</li>
-                ))}
-              </ul>
             </div>
 
             <ul className="hero__stats" aria-label="Resumen del sistema">
@@ -369,7 +398,7 @@ function App() {
         <aside className="journey__rail" aria-label="Recorrido de la landing">
           <div className="journey__track">
             <div className="journey__bus" style={{ top: busTop }}>
-              BUS
+              <img src={getPublicImageUrl('bus_top_view_icon.svg')} alt="" aria-hidden="true" />
             </div>
             <div className="journey__line"></div>
             <div className="journey__line-active" style={{ height: lineProgress }}></div>
@@ -393,26 +422,26 @@ function App() {
         </aside>
 
         <div className="journey__content">
-          <section className="content-section content-section--intro" id="presentacion">
-            <span className="section-tag">Presentacion del sistema</span>
+          <section className="content-section content-section--intro" id="presentacion" data-reveal>
+            <span className="section-tag" data-reveal>Presentación del sistema</span>
             <div className="section-layout">
               <div>
-                <h2>Busi organiza transportes privados en una plataforma simple, visible y conectada.</h2>
-                <p>
+                <h2 data-reveal>Busi organiza transportes privados en una plataforma <em className="kw">simple, visible y conectada.</em></h2>
+                <p data-reveal>
                   Busi es un sistema pensado para organizaciones que necesitan planificar rutas
-                  de servicio, supervisar el recorrido de cada unidad en tiempo real y mantener
+                  de servicio, supervisar el recorrido de cada unidad en <em className="kw">tiempo real</em> y mantener
                   a los clientes informados durante todo el trayecto.
                 </p>
-                <p>
+                <p data-reveal>
                   Al reunir operacion, seguimiento y comunicacion en un solo lugar, la
                   plataforma reduce la desorganizacion diaria y mejora la experiencia de
                   clientes, operadores y equipos de coordinacion.
                 </p>
               </div>
 
-              <aside className="section-note">
+              <aside className="section-note" data-reveal>
                 <span className="section-note__eyebrow">Objetivo de Busi</span>
-                <strong>Hacer que cada recorrido de servicio sea mas ordenado, visible y facil de coordinar.</strong>
+                <strong>Hacer que cada recorrido de servicio sea más <em className="kw">ordenado, visible y fácil de coordinar.</em></strong>
                 <ul className="section-note__list">
                   <li>Explica que es Busi y como funciona el sistema.</li>
                   <li>Muestra beneficios reales para coordinacion, operadores y clientes.</li>
@@ -422,18 +451,18 @@ function App() {
             </div>
           </section>
 
-          <section className="content-section content-section--highlight" id="problema">
-            <span className="section-tag">Problema actual</span>
-            <h2>Hoy los transportes privados suelen depender de informacion fragmentada y poca visibilidad.</h2>
-            <p>
-              Cuando la coordinacion ocurre por distintos canales, la operacion pierde control,
+          <section className="content-section content-section--highlight" id="problema" data-reveal>
+            <span className="section-tag" data-reveal>Problema actual</span>
+            <h2 data-reveal>Hoy los transportes privados dependen de información <em className="kw">fragmentada</em> y poca visibilidad.</h2>
+            <p data-reveal>
+              Cuando la coordinacion ocurre por distintos canales, la operacion pierde <em className="kw">control</em>,
               los clientes reciben menos certeza y el recorrido se vuelve mas dificil de
               supervisar en tiempo real.
             </p>
 
             <div className="problem-list">
-              {problems.map((problem) => (
-                <article key={problem} className="problem-card">
+              {problems.map((problem, i) => (
+                <article key={problem} className="problem-card" data-reveal style={{ '--reveal-delay': `${i * 80}ms` }}>
                   <span className="problem-card__marker"></span>
                   <p>{problem}</p>
                 </article>
@@ -441,41 +470,62 @@ function App() {
             </div>
           </section>
 
-          <section className="content-section" id="solucion">
-            <span className="section-tag">La solucion</span>
-            <h2>Busi resuelve recorridos de servicio con una plataforma clara, conectada y preparada para crecer.</h2>
-            <p>
+          <section className="content-section" id="solucion" data-reveal>
+            <span className="section-tag" data-reveal>La solución</span>
+            <h2 data-reveal>Busi resuelve recorridos con una plataforma <em className="kw">clara, conectada y preparada para crecer.</em></h2>
+            <p data-reveal>
               Cada parada del recorrido representa una funcionalidad del sistema. En lugar de
-              depender de mensajes aislados, Busi centraliza la operacion diaria y facilita
+              depender de mensajes aislados, Busi <em className="kw">centraliza</em> la operacion diaria y facilita
               decisiones con mejor informacion.
             </p>
-            <p>
+            <p data-reveal>
               La experiencia visual acompana esa idea: la unidad avanza mientras el usuario
               hace scroll y cada parada explica una capacidad concreta de la plataforma.
             </p>
 
             <div className="feature-grid">
-              {features.map((feature) => (
-                <article key={feature.title} className="info-card">
-                  <span className="info-card__eyebrow">{feature.stop}</span>
-                  <h3>{feature.title}</h3>
-                  <p>{feature.description}</p>
-                </article>
-              ))}
+              {features.map((feature, i) => {
+                const featureImageUrl = getPublicImageUrl(feature.image)
+
+                return (
+                  <article
+                    key={feature.title}
+                    className="info-card info-card--media"
+                    data-reveal
+                    style={{
+                      '--reveal-delay': `${i * 80}ms`,
+                      backgroundImage: `linear-gradient(180deg, rgba(5, 16, 36, 0.16) 18%, rgba(3, 10, 24, 0.84) 100%), url("${featureImageUrl}")`,
+                      backgroundPosition: feature.imagePosition,
+                    }}
+                  >
+                    <span className="info-card__eyebrow info-card__eyebrow--media">{feature.stop}</span>
+                    <div className="info-card__body">
+                      <h3>{feature.title}</h3>
+                      <p>{feature.description}</p>
+                      <a className="info-card__cta" href="#acciones">
+                        <span className="info-card__cta-icon" aria-hidden="true">
+                          {'>'}
+                        </span>
+                        Ver mas
+                      </a>
+                    </div>
+                  </article>
+                )
+              })}
             </div>
           </section>
 
-          <section className="content-section" id="como-funciona">
-            <span className="section-tag">Como funciona</span>
-            <h2>Un mismo sistema conecta a coordinacion, operadores y clientes con objetivos distintos y una operacion compartida.</h2>
-            <p>
-              La plataforma adapta la experiencia a cada actor, pero mantiene una base comun
+          <section className="content-section" id="como-funciona" data-reveal>
+            <span className="section-tag" data-reveal>Cómo funciona</span>
+            <h2 data-reveal>Un mismo sistema conecta coordinacion, operadores y clientes — <em className="kw">un solo flujo, tres perspectivas.</em></h2>
+            <p data-reveal>
+              La plataforma adapta la experiencia a cada actor, pero mantiene una base <em className="kw">común</em>
               de informacion para que el servicio completo se entienda y se gestione mejor.
             </p>
 
             <div className="role-grid">
-              {roles.map((role) => (
-                <article key={role.title} className="role-card">
+              {roles.map((role, i) => (
+                <article key={role.title} className="role-card" data-reveal style={{ '--reveal-delay': `${i * 80}ms` }}>
                   <h3>{role.title}</h3>
                   <p>{role.description}</p>
                   <ul className="role-card__list">
@@ -488,12 +538,12 @@ function App() {
             </div>
           </section>
 
-          <section className="content-section content-section--soft" id="beneficios">
-            <span className="section-tag">Beneficios del sistema</span>
-            <h2>Mas control para la coordinacion, mas confianza para los clientes y menos friccion en cada recorrido.</h2>
+          <section className="content-section content-section--soft" id="beneficios" data-reveal>
+            <span className="section-tag" data-reveal>Beneficios del sistema</span>
+            <h2 data-reveal>Más <em className="kw">control</em> para la coordinacion, más <em className="kw">confianza</em> para los clientes y menos fricción en cada recorrido.</h2>
             <div className="benefit-grid">
-              {benefits.map((benefit) => (
-                <article key={benefit.title} className="benefit-card">
+              {benefits.map((benefit, i) => (
+                <article key={benefit.title} className="benefit-card" data-reveal style={{ '--reveal-delay': `${i * 80}ms` }}>
                   <h3>{benefit.title}</h3>
                   <p>{benefit.description}</p>
                 </article>
@@ -501,7 +551,7 @@ function App() {
             </div>
           </section>
 
-          <section className="content-section cta-section" id="acciones">
+          <section className="content-section cta-section" id="acciones" data-reveal>
             <ContactSection />
           </section>
         </div>

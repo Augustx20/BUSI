@@ -105,7 +105,7 @@
 }
 
 .topbar__links a:focus-visible {
-  outline: 2px solid rgba(29, 78, 216, 0.3);
+  outline: 2px solid rgba(22, 46, 147, 0.32);
   outline-offset: 3px;
 }
 
@@ -118,9 +118,18 @@
 }
 
 .button--dark {
+  color: var(--accent-deep);
+  border-color: var(--accent);
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.button--dark:hover,
+.button--dark:focus-visible {
   color: #ffffff;
-  background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
-  box-shadow: 0 14px 28px rgba(30, 64, 175, 0.22);
+  border-color: var(--accent-deep);
+  background: var(--accent-deep);
+  box-shadow: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

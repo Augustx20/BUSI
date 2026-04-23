@@ -5,7 +5,8 @@
   --fw-bold: 700;
   --fw-extrabold: 800;
   font-size: clamp(16px, 0.2vw + 15px, 17px);
-  font-family: Inter, sans-serif;
+  font-family: 'Jost', sans-serif;
+  font-optical-sizing: auto;
   font-feature-settings: 'liga' 1, 'calt' 1;
   line-height: 1.5;
   font-weight: var(--fw-regular);
@@ -15,12 +16,6 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-@supports (font-variation-settings: normal) {
-  :root {
-    font-family: InterVariable, sans-serif;
-  }
 }
 
 * {

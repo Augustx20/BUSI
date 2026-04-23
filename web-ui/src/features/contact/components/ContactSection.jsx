@@ -5,31 +5,52 @@ function ContactSection() {
   const { formData, formStatus, isSubmitting, handleInputChange, handleSubmit } = useContactForm()
 
   return (
-    <>
-      <span className="section-tag">Contactanos</span>
-      <h2>Contactanos para implementar Busi en tu organizacion.</h2>
-      <p>
-        Completa tus datos y te contactamos para evaluar tu operacion,
-        configurar el servicio y acompanarte en la implementacion.
-      </p>
+    <div className="contact-layout">
+      <div className="contact-intro">
+        <span className="section-tag">Contactanos</span>
+        <h2><em className="frase-it">Empezá con nosotros.</em> Implementá Busi en tu organización.</h2>
+        <p>
+          Completá tus datos y te contactamos para evaluar tu operación,
+          <em className="kw"> configurar el servicio</em> y acompañarte en cada paso.
+        </p>
+        <ul className="contact-perks">
+          <li>Sin costo inicial de evaluación</li>
+          <li>Configuración personalizada</li>
+          <li>Soporte durante la implementación</li>
+        </ul>
+      </div>
 
       <form className="contact-form" onSubmit={handleSubmit} id="demo">
-        <div className="form-group">
-          <label htmlFor="name">Nombre completo *</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            maxLength={CONTACT_FORM_MAX_LENGTH.name}
-            required
-            placeholder="Tu nombre"
-          />
+        <div className="contact-form__row">
+          <div className="form-group">
+            <label htmlFor="name">Nombre *</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              maxLength={CONTACT_FORM_MAX_LENGTH.name}
+              required
+              placeholder="Tu nombre"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="phone">Teléfono</label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              maxLength={CONTACT_FORM_MAX_LENGTH.phone}
+              placeholder="+54 9 11 2345-6789"
+            />
+          </div>
         </div>
 
         <div className="form-group">
-          <label htmlFor="email">Correo electronico *</label>
+          <label htmlFor="email">Correo electrónico *</label>
           <input
             type="email"
             id="email"
@@ -39,19 +60,6 @@ function ContactSection() {
             maxLength={CONTACT_FORM_MAX_LENGTH.email}
             required
             placeholder="tu@email.com"
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="phone">Telefono</label>
-          <input
-            type="tel"
-            id="phone"
-            name="phone"
-            value={formData.phone}
-            onChange={handleInputChange}
-            maxLength={CONTACT_FORM_MAX_LENGTH.phone}
-            placeholder="+54 9 11 2345-6789"
           />
         </div>
 
@@ -78,8 +86,8 @@ function ContactSection() {
             onChange={handleInputChange}
             maxLength={CONTACT_FORM_MAX_LENGTH.message}
             required
-            placeholder="Contanos sobre tu organizacion y que te interesa de Busi"
-            rows="4"
+            placeholder="Contanos sobre tu organización y qué te interesa de Busi"
+            rows="3"
           ></textarea>
         </div>
 
@@ -93,9 +101,8 @@ function ContactSection() {
           {isSubmitting ? 'Enviando...' : 'Enviar consulta'}
         </button>
       </form>
-    </>
+    </div>
   )
 }
 
 export default ContactSection
-
